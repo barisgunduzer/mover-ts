@@ -43,8 +43,9 @@ export default class Mapper {
     const location = this.listMap.get(id);
     if (location === undefined) {
       throw new Error(`Location not found`);
+    } else {
+      return location;
     }
-    return location;
   };
 
   getIndexes = (source: string, destination: string): ValidIndexes => {
