@@ -53,15 +53,26 @@ export default class Validator {
       destinationFileIndex,
     } = indexes;
 
-    if (sourceFolderIndex == null || destinationFolderIndex == null) {
-      throw new Error('Folder indexes cannot be null');
-    } else if (sourceFolderIndex === destinationFolderIndex) {
-      throw new Error('File cannot be moved to its own folder');
-    } else if (sourceFileIndex == null) {
-      throw new Error('Folder cannot be moved');
-    } else if (destinationFileIndex != null) {
-      throw new Error('Destination cannot be a file');
-    }
+    const [isSourceFolderIndexNull, isDestinationFolderIndexNull] = [
+      sourceFolderIndex == null,
+      destinationFolderIndex == null,
+    ];
+
+    const conditionals = {
+      'Folder indexes cannot be null': isSourceFolderIndexNull || isDestinationFolderIndexNull,
+      'File cannot be moved to its own folder': sourceFolderIndex === destinationFolderIndex,
+      'Folder cannot be moved': sourceFileIndex == null,
+      'Destination cannot be a file': destinationFileIndex != null,
+    };
+
+    const messages = Object.keys(conditionals);
+    const conditions = Object.values(conditionals);
+
+    conditions.forEach((condition, messageIndex) => {
+      if (condition) {
+        throw new Error(messages[messageIndex]);
+      }
+    });
 
     return indexes as ValidIndexes;
   };
