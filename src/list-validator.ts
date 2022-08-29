@@ -2,23 +2,28 @@ import { File } from './list-types';
 
 export default interface IListValidator {
   /**
-   * Validates given file and its properties
+   * Checks if given source is valid or not
+   * @param source The source id parameter to check
+   */
+  isValidSource(source: string): boolean;
+
+  /**
+   * Checks if given destination is valid or not
+   * @param destination The source id parameter to check
+   */
+  isValidDestination(destination: string): boolean;
+
+  /**
+   * Checks if given file is a valid file or not
    * @param file The source file id
    */
   isValidFile(file: File): boolean;
 
   /**
-   * Validates given file as a folder and validates its properties
+   * Checks if given file is a valid folder or not (at this point folder flattened to a file).
    * @param file The source file id
    */
   isValidFolder(file: File): boolean;
-
-  /**
-   * Validates list method
-   * @param source The source file id
-   * @param source The destination folder id
-   */
-  validateInput(source: string, destination?: string): boolean;
 }
 
 export class ListValidator implements IListValidator {
@@ -28,37 +33,21 @@ export class ListValidator implements IListValidator {
 
   private folderNamePattern = /^(Folder+\s+[1-9]+\d*$)$/;
 
-  private validateSource(source: string) {
-    const isSourceValid = this.idPattern.test(source);
-    if (!isSourceValid) {
-      throw new Error('Source is not valid');
-    }
+  public isValidSource(source: string): boolean {
+    if (!this.idPattern.test(source)) throw new Error('Source is not valid');
+    return true;
   }
 
-  private validateDestination(source: string) {
-    const isDestinationValid = this.idPattern.test(source);
-    if (!isDestinationValid) {
-      throw new Error('Destination is not valid');
-    }
-  }
-
-  public validateInput(source: string, destination?: string): boolean {
-    this.validateSource(source);
-    if (typeof destination === 'string') {
-      this.validateDestination(destination);
-    }
+  public isValidDestination(destination: string): boolean {
+    if (!this.idPattern.test(destination)) throw new Error('Destination is not valid');
     return true;
   }
 
   public isValidFile(file: File): boolean {
-    const isIdPatternValid = this.idPattern.test(file.id);
-    const isFilePatternValid = this.fileNamePattern.test(file.name);
-    return isIdPatternValid && isFilePatternValid;
+    return this.idPattern.test(file.id) && this.fileNamePattern.test(file.name);
   }
 
   public isValidFolder(file: File): boolean {
-    const isIdPatternValid = this.idPattern.test(file.id);
-    const isFilePatternValid = this.folderNamePattern.test(file.name);
-    return isIdPatternValid && isFilePatternValid;
+    return this.idPattern.test(file.id) && this.folderNamePattern.test(file.name);
   }
 }

@@ -75,7 +75,7 @@ export class ListImpl implements IListImpl {
         fileIndex += 1;
         this.listMap.set(file.id, { folderIndex, fileIndex });
       } else {
-        throw new Error('Some properties are not valid in given list');
+        throw new Error('Given list is not valid');
       }
     });
     return true;
@@ -91,7 +91,7 @@ export class ListImpl implements IListImpl {
   }
 
   public getFile(source: string): File {
-    this.listValidator.validateInput(source);
+    this.listValidator.isValidSource(source);
     const { folderIndex, fileIndex } = this.getLocation(source);
     if (fileIndex === -1) {
       throw new Error('File cannot be get, requested file id but folder id given');
@@ -101,20 +101,23 @@ export class ListImpl implements IListImpl {
   }
 
   public addFile(file: File, destination: string): boolean {
-    this.listValidator.validateInput(destination);
+    this.listValidator.isValidDestination(destination);
+    if (!this.listValidator.isValidFile(file)) {
+      throw new Error('File cannot be added, file is not valid');
+    }
     const { folderIndex, fileIndex } = this.getLocation(destination);
     if (fileIndex !== -1) {
       throw new Error('File cannot be added, requested folder id but file id given.');
     }
     const { files } = this.list[folderIndex];
     files.push(file);
-    const newFileIndex = files.length - 1;
-    this.listMap.set(file.id, { folderIndex, fileIndex: newFileIndex });
+    this.listMap.set(file.id, { folderIndex, fileIndex: files.length - 1 });
     return true;
   }
 
   public moveFile(source: string, destination: string): List {
-    this.listValidator.validateInput(source, destination);
+    this.listValidator.isValidSource(source);
+    this.listValidator.isValidDestination(destination);
     const sourceIndexes = this.getLocation(source);
     const destinationIndexes = this.getLocation(destination);
     if (sourceIndexes.folderIndex === destinationIndexes.folderIndex) {
@@ -126,7 +129,7 @@ export class ListImpl implements IListImpl {
   }
 
   public removeFile(source: string): File {
-    this.listValidator.validateInput(source);
+    this.listValidator.isValidSource(source);
     const sourceIndexes = this.getLocation(source);
     const { folderIndex, fileIndex } = sourceIndexes;
     if (fileIndex === -1) {
